@@ -1,0 +1,204 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/static/images/icon.png" type="image/png" sizes="160x160">
+<link rel="apple-touch-icon" href="/static/images/apple-icon.png" sizes="160x160">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'fonts/flaticon/font/flaticon.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/tiny-slider.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <title>
+      Billing Software
+    </title>
+       <style>
+        /* Highlighted, bold text */
+        .alert-message {
+            font-weight: bold;
+            background-color: yellow;
+            padding: 10px;
+            border-radius: 5px;
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    {% include 'admin_nav.html' %}
+
+<br><br><br>
+
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Add Item</h1>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function calculateCGSTSGST() {
+        const gstValue = parseFloat(document.getElementById("gst").value) || 0;
+        const cgstSgstValue = gstValue / 2;
+
+        document.getElementById("cgst").value = cgstSgstValue.toFixed(2);
+        document.getElementById("sgst").value = cgstSgstValue.toFixed(2);
+    }
+</script>
+	<!-- end header -->
+<br/><br/>
+    <div class="container mt-5">
+                  {% if messages %}
+        <div class="alert-message">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+        <form action="/addItem" method="POST" enctype="multipart/form-data">
+             {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="barcode">Barcode NO:</label>
+                    <input type="text" class="form-control" id="barcode" name="barcode" >
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="itemname">Item Name:</label>
+                    <input type="text" class="form-control" id="itemname" name="itemname" required>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label for="hsncode">HSN Code:</label>
+                    <input type="tel" class="form-control" id="hsncode" name="hsncode" required>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label for="price">Price:</label>
+                    <input type="text" class="form-control" id="price" name="price" >
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="stock">Stock:</label>
+                    <input type="text" class="form-control" id="stock" name="stock" >
+                </div>
+<div class="col-md-6 form-group">
+    <label for="gst">GST:</label>
+    <input type="text" class="form-control" id="gst" name="gst" oninput="calculateCGSTSGST()" placeholder="Enter GST">
+</div>
+<div class="col-md-6 form-group">
+    <label for="cgst">CGST:</label>
+    <input type="text" class="form-control" id="cgst" name="cgst" readonly>
+</div>
+<div class="col-md-6 form-group">
+    <label for="sgst">SGST:</label>
+    <input type="text" class="form-control" id="sgst" name="sgst" readonly>
+</div>
+
+
+
+
+                <div class="col-md-6 form-group">
+                    <br/>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+                </div>
+
+                </br>
+
+
+            </div>
+        </form>
+    </div>
+<br/>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+    let barcodeBuffer = ''; // Buffer for scanned barcode
+    let scanTimeout;
+
+    document.getElementById("barcode").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent form submission on Enter key
+            processBarcode(barcodeBuffer); // Process the entire barcode
+            barcodeBuffer = ''; // Clear the buffer after processing
+        } else {
+            // Capture the barcode in real time
+            barcodeBuffer += event.key;
+
+            // Clear buffer after a timeout (adjust the timeout duration as necessary)
+            clearTimeout(scanTimeout);
+            scanTimeout = setTimeout(() => {
+                barcodeBuffer = '';
+            }, 300); // 300ms timeout
+        }
+    });
+
+
+</script>
+
+<div class="row mt-5">
+          <div class="col-12 text-center">
+            <!--
+              **==========
+              NOTE:
+              Please don't remove this copyright link unless you buy the license here https://untree.co/license/
+              **==========
+            -->
+
+          </div>
+        </div>
+      </div>
+      <!-- /.container -->
+    </div>
+    <!-- /.site-footer -->
+
+    <!-- Preloader -->
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/tiny-slider.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/counter.js' %}"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+  </body>
+</html>
+

@@ -1,0 +1,21 @@
+{
+  "name": "Billing",
+  "short_name": "Billing",
+  "description": "A fantastic Progressive Web App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "/static/images/icon.png",
+      "sizes": "160x160",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/apple-icon.png",
+      "sizes": "160x160",
+      "type": "image/png"
+    }
+  ]
+}

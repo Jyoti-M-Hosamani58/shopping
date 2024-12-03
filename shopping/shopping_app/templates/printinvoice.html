@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Print Bill</title>
+<style>
+        @page {
+            size: 80mm auto; /* Increased height to 100mm */
+            margin: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+            height: auto; /* Increased height to 100mm */
+            box-sizing: border-box;
+        }
+        .card {
+            padding: 5mm;
+            margin: 0 auto;
+            max-width: 70mm; /* Adjust max-width as needed */
+            background-color: #fff;
+        }
+        .btn-print {
+            display: block;
+            text-align: center;
+            margin-bottom: 5mm;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5mm;
+        }
+        th, td {
+            text-align: left;
+            padding: 1mm;
+            font-size: 12px;
+        }
+        th {
+            font-size: 11px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 5mm;
+            font-size: 14px;
+        }
+        p {
+            text-align: left;
+            font-size: 12px;
+            margin-bottom: 3mm;
+        }
+        .table-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3mm;
+            font-size: 10px;
+            margin-left:80px;
+            font-weight:bold;
+        }
+        .totals {
+            text-align: right;
+            margin-top: 3mm;
+        }
+        .totals p {
+            margin-left: 0;
+            font-size: 12px;
+        }
+        @media print {
+            .btn-print {
+                display: none;
+            }
+        }
+        .heading {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <a href="javascript:window.print()" class="btn btn-danger btn-print">Print</a>
+            <h1>Saree Center</h1>
+            <p class="heading">Dajibanpeth Hubli<br></p>
+            <hr>
+        <div class="table-info">
+            <p>Invoice No: {{ invoice_details.invoiceNo }}</p>
+            </div>
+        <table>
+            <tr>
+                <th>Sl. No</th>
+                <th>Item name</th>
+                <th>Qty</th>
+                <th>Price</th>
+            </tr>
+            <!-- Iterate over items and display them -->
+            {% for item in items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.itemname }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td  style="font-size:14px;" colspan="2"><strong>Total</strong></td>
+                <td  style="font-size:14px;"><strong>{{ total_qty }}</strong></td>
+                <td  style="font-size:14px;"><strong>{{ subtotal }}</strong></td>
+            </tr>
+
+        </table>
+        <p style="text-align:right; font-size:14px;"><strong>
+        CGST Total: {{ cgst_total }}</br>
+        SGST Total: {{ sgst_total }}</br>
+        Grand Total: {{ grand_total }}</br>
+        {% if items.0.discountAmt and items.0.discountAmt > 0 %}
+            Discount : {{ items.0.discountAmt }}</br>
+            Grand Total Include Discount: {{ discounted_total }}</br>
+        {% endif %}</strong></p>
+    </div>
+<a href="{% url 'sales' %}" class="btn-danger btn btn-print">Back</a>
+</body>
+</html>

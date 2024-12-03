@@ -1,0 +1,410 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/static/images/icon.png" type="image/png" sizes="160x160">
+<link rel="apple-touch-icon" href="/static/images/apple-icon.png" sizes="160x160">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'fonts/flaticon/font/flaticon.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/tiny-slider.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <title>
+      Billing Software
+    </title>
+      <style>
+          .hidden {
+    display: none;
+}
+body {
+    background-color: #fffacd; /* Light yellow */
+}
+
+
+      </style>
+  </head>
+  <body>
+    <div class="site-mobile-menu site-navbar-target">
+      <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+          <span class="icofont-close js-menu-toggle"></span>
+        </div>
+      </div>
+      <div class="site-mobile-menu-body"></div>
+    </div>
+
+    {% include 'admin_nav.html' %}
+<br><br><br>
+
+      <div class="container">
+        <div class="row justify-content-center align-items-center">
+          <div class="col-lg-9 text-center mt-5">
+            <h1 class="heading" data-aos="fade-up">Add Sales</h1>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+	<!-- end header -->
+<form id="itemForm" action="{% url 'save_sales' %}" method="POST">
+    {% csrf_token %}
+    <div class="container">
+    <div class="row">
+
+        <div class="col-md-3 form-group">
+            <label for="barcode">Barcode:</label>
+    <input type="text" id="barcode" name="barcode" class="form-control" placeholder="Scan barcode here" autofocus>
+    <div id="itemDetails"></div>        </div>
+
+        <div class="col-md-3 form-group">
+            <label for="name">Customer Name:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+
+    <div class="col-md-3 form-group">
+            <label for="phone">Phone Number:</label>
+            <input type="text" class="form-control" id="phone" name="phone" required>
+        </div>
+
+
+         <div class="col-md-2 form-group">
+            <label for="discount">Discount:</label>
+    <input type="text" class="form-control" id="discount" name="discount" value="0" oninput="updateTotals()">
+        </div>
+
+
+
+       <div class="row">
+           <div class="col-md-2 form-group">
+    <label for="discount">Discount Amount:</label>
+    <input type="text" class="form-control" id="discountAmt" name="discountAmt" value="0" oninput="updateDiscountedTotal()">
+</div>
+
+           <div class="col-md-3 form-group">
+    <label>Payment Mode</label>
+    <select name="payment" id="payment" class="form-control" required onchange="toggleAmountInput()">
+        <option value="">-- Select --</option>
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="CashUPI">Cash + UPI</option>
+    </select>
+</div>
+<div class="col-md-2 form-group">
+<div id="cashContainer" style="display: none;">
+    <br/>
+    <input id="Cash" name="Cash" placeholder="Enter Cash Amount" class="form-control" />
+</div>
+</div>
+        <div class="col-md-2 form-group">
+<div id="upiContainer" style="display: none;">
+    <br/>
+    <input id="UPI" name="UPI" placeholder="Enter UPI Amount" class="form-control" />
+</div>
+        </div>
+           </div>
+<script>
+function toggleAmountInput() {
+    const paymentSelect = document.getElementById('payment');
+    const cashContainer = document.getElementById('cashContainer');
+    const upiContainer = document.getElementById('upiContainer');
+
+    // Reset display of input containers
+    cashContainer.style.display = 'none';
+    upiContainer.style.display = 'none';
+
+    // Show the appropriate input fields based on the selected payment mode
+    if (paymentSelect.value === 'Cash') {
+        cashContainer.style.display = 'block';
+    } else if (paymentSelect.value === 'UPI') {
+        upiContainer.style.display = 'block';
+    } else if (paymentSelect.value === 'CashUPI') {
+        cashContainer.style.display = 'block';
+        upiContainer.style.display = 'block';
+    }
+}
+</script>
+    </div>
+    <div id="itemList" class="mt-4">
+        <h4>Items List</h4>
+        <div id="itemContainer">
+            <!-- Dynamic item rows will appear here -->
+        </div>
+        <div class="mt-3" style="font-size:20px; color:black;"><strong>
+            <p>Total Price: <span id="totalPrice">0.00</span></p>
+            <p>Total GST: <span id="totalGST">0.00</span></p>
+            <p>Grand Total: <span id="grandTotal" name="grandTotal">0.00</span></p>
+            <p>Discounted Total: <span id="discountedTotal">0.00</span></p>
+
+        </strong></p>
+        </div>
+    </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+</form>
+
+<script>
+    let totalPrice = 0;
+    let totalGST = 0;
+    let barcodeBuffer = '';
+    let scanTimeout;
+
+    document.getElementById('barcode').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission if inside a form
+        fetchItemDetails();
+    }
+});
+
+function fetchItemDetails() {
+    const barcode = document.getElementById('barcode').value;
+
+    if (barcode.trim() === "") {
+        alert("Please enter or scan a barcode.");
+        return;
+    }
+        if (barcode) {
+            fetch(`/get_item_by_barcode/${barcode}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const item = data.item;
+                        const cgst = item.gst / 2;
+                        const sgst = item.gst / 2;
+
+                        // Create a new item row in the form
+                        const itemRow = `
+                            <div class="row item-row" data-price="${item.price}" data-gst="${item.gst}">
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" name="itemname" value="${item.itemname}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="text" class="form-control" name="hsncode" value="${item.hsncode}" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="number" class="form-control price-field" value="${item.price}" onchange="updateTotals()">
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="number" class="form-control quantity-field" name="quantity" value="1" min="1" onchange="updateTotals()">
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="input-group">
+                                        <input type="text" readonly class="form-control gst-field" value="${item.gst}" onchange="updateTotals()">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="text" class="form-control cgst-field" value="${cgst.toFixed(2)}%" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="text" class="form-control sgst-field" value="${sgst.toFixed(2)}%" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-danger" onclick="removeItemRow(this)">Remove</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="hidden" class="form-control barcode_number-field" value="${item.barcode_number}" readonly>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById("itemContainer").insertAdjacentHTML('beforeend', itemRow);
+
+                        // Clear the barcode input field and update totals
+                        updateTotals();
+                        document.getElementById("barcode").value = "";
+                    } else {
+                        alert("Item not found.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching item:", error);
+                    alert("Error fetching item details.");
+                });
+        }
+    }
+function updateTotals() {
+    let newTotalPrice = 0;
+    let newTotalGST = 0;
+
+    // Loop through each item row and recalculate totals
+    document.querySelectorAll(".item-row").forEach(row => {
+        const price = parseFloat(row.querySelector(".price-field").value) || 0;
+        const quantity = parseInt(row.querySelector(".quantity-field").value) || 1;
+        const gstRate = parseFloat(row.querySelector(".gst-field").value) || 0;
+
+        const itemTotalPrice = price * quantity;
+        const itemGST = (itemTotalPrice * gstRate) / 100;
+
+        newTotalPrice += itemTotalPrice;
+        newTotalGST += itemGST;
+
+        // Debugging output
+        console.log("Price:", price, "Quantity:", quantity, "GST Rate:", gstRate);
+        console.log("Item Total Price:", itemTotalPrice, "Item GST:", itemGST);
+    });
+
+    // Update total price and GST display
+    document.getElementById("totalPrice").innerText = newTotalPrice.toFixed(2);
+    document.getElementById("totalGST").innerText = newTotalGST.toFixed(2);
+
+    // Calculate grand total (without adding GST)
+    const grandTotal = newTotalPrice;
+
+    document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+
+    // Get the discount percentage from the input
+    const discountRate = parseFloat(document.getElementById("discount").value) || 0;
+
+    // Calculate discount amount
+    const discountAmount = (grandTotal * discountRate) / 100;
+
+    // Display the discount amount in the 'Discount Amount' field
+    document.getElementById("discountAmt").value = discountAmount.toFixed(2);
+
+    // Calculate the discounted total after applying discount
+    const discountedTotal = grandTotal - discountAmount;
+
+    // Update the discounted total display
+    document.getElementById("discountedTotal").innerText = discountedTotal.toFixed(2);
+}
+
+// Step 3: Add a function to update the discounted total when the discount amount is changed directly
+// Function to update the discounted total when the discount amount is changed directly
+function updateDiscountedTotal() {
+    // Get the current grand total
+    const grandTotal = parseFloat(document.getElementById("grandTotal").innerText) || 0;
+
+    // Get the manual discount amount entered by the user
+    const discountAmount = parseFloat(document.getElementById("discountAmt").value) || 0;
+
+    // Calculate the discounted total after applying the discount
+    const discountedTotal = grandTotal - discountAmount;
+
+    // Update the discounted total display
+    document.getElementById("discountedTotal").innerText = discountedTotal.toFixed(2);
+}
+
+// Call this function whenever the discount amount changes (directly in the input field)
+document.getElementById("discountAmt").addEventListener("input", updateDiscountedTotal);
+
+
+    // Function to remove an item row
+    function removeItemRow(button) {
+        button.closest(".item-row").remove();
+        updateTotals();
+    }
+document.getElementById("itemForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Create a FormData object from the form
+    const formData = new FormData(this);
+
+    // Convert item rows to JSON format
+    const items = [];
+    document.querySelectorAll('.item-row').forEach(row => {
+        const itemName = row.querySelector('input[name="itemname"]').value;
+        const hsnCode = row.querySelector('input[name="hsncode"]').value;
+        const price = row.querySelector('.price-field').value;
+        const quantity = row.querySelector('.quantity-field').value;
+        const gst = row.querySelector('.gst-field').value;
+        const barcode = row.querySelector('.barcode_number-field').value;
+
+        items.push({ itemName, hsnCode, price, quantity, gst, barcode });
+    });
+
+    // Append items data as JSON
+    formData.append('items', JSON.stringify(items));
+
+    // Submit the form data using fetch
+    fetch("{% url 'save_sales' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message); // Show success message
+            // Optionally, redirect or clear the form here
+            document.getElementById("itemForm").reset(); // Reset form if needed
+            document.getElementById("itemContainer").innerHTML = ""; // Clear item list if needed
+            window.location.href = "/printInvoice/" + data.invoice_no; // Redirect to invoice page
+        } else {
+            showErrorModal(data.message); // Show error message in a modal
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showErrorModal("An error occurred while saving data.");
+    });
+});
+
+// Function to show error messages in a modal
+function showErrorModal(message) {
+    document.getElementById('errorMessage').innerText = message; // Set error message
+    document.getElementById('errorModal').style.display = 'block'; // Show modal
+}
+
+// Function to close the error modal
+function closeModal() {
+    document.getElementById('errorModal').style.display = 'none'; // Hide modal
+}
+
+
+</script>
+
+  <div class="row mt-5">
+          <div class="col-12 text-center">
+            <!--
+              **==========
+              NOTE:
+              Please don't remove this copyright link unless you buy the license here https://untree.co/license/
+              **==========
+            -->
+
+
+
+          </div>
+        </div>
+      </div>
+      <!-- /.container -->
+    </div>
+    <!-- /.site-footer -->
+
+    <!-- Preloader -->
+    <div id="overlayer"></div>
+    <div class="loader">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/tiny-slider.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/counter.js' %}"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+  </body>
+</html>
+
